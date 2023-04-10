@@ -62,34 +62,16 @@ const commentators = [
 // Создаем рендер-функцию
 const renderCommentators = () => {
 	const commentatorsHtml = commentators.map((commentator, index) => {
-		return commentator.isEdit ? 
-		`<li class="comment">
+			return `<li class="comment">
 			<div class="comment-header">
 				<div>${commentator.name}</div>
 				<div>${commentator.date}</div>
 			</div>
 			<div class="comment-body">
-				<textarea id="input" class="comment-text" type="texrarea">${commentator.comment}</textarea>
+				${commentator.isEdit ? `<textarea id="input" class="comment-text" type="texrarea">${commentator.comment}</textarea>` : `<div class="comment-text">${commentator.comment}</div>`}
 			</div>
 			<div class="comment-footer">
-				<button data-index="${index}" class="save-form-button">Сохранить</button>
-				<div class="likes">
-					<span class="likes-counter">${commentator.likeCounter}</span>
-					<button class="like-button ${commentator.likeCondition ? '-active-like' : ''}" data-index="${index}"></button>
-				</div>
-			</div>
-			</li>`
-		:
-		`<li class="comment">
-			<div class="comment-header">
-				<div>${commentator.name}</div>
-				<div>${commentator.date}</div>
-			</div>
-			<div class="comment-body">
-				<div class="comment-text">${commentator.comment}</div>
-			</div>
-			<div class="comment-footer">
-				<button data-index="${index}" class="edit-form-button">Редактировать</button>
+				${commentator.isEdit ? `<button data-index="${index}" class="save-form-button">Сохранить</button>` : `<button data-index="${index}" class="edit-form-button">Редактировать</button>`}
 				<div class="likes">
 					<span class="likes-counter">${commentator.likeCounter}</span>
 					<button class="like-button ${commentator.likeCondition ? '-active-like' : ''}" data-index="${index}"></button>
@@ -111,7 +93,7 @@ function funcLikes() {
 	for (const btnLike of buttonLikes) {
 		const index = btnLike.dataset.index;
 		btnLike.addEventListener("click", () => {
-			if (commentators[index].likeCondition === true) {
+			if (commentators[index].likeCondition) {
 				commentators[index].likeCondition = false;
 				commentators[index].likeCounter -= 1;
 			} else {
@@ -129,7 +111,7 @@ function editMessage() {
 	for (const edBtn of buttonEdit) {
 		const index = edBtn.dataset.index;
 		edBtn.addEventListener("click", () =>{
-			commentators[index].isEdit ? commentators[index].isEdit = false : commentators[index].isEdit = true;
+			commentators[index].isEdit = !commentators[index].isEdit;
 			renderCommentators();
 		})
 	}
