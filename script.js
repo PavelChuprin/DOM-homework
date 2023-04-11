@@ -83,6 +83,7 @@ function replyMessage () {
 	for (const each of eachElementList) {
 		const index = each.dataset.index;
 		each.addEventListener('click', () => {
+			commentElement.scrollIntoView({behavior: "smooth"}); // плавная прокрутка к полю ввода
 			commentElement.value = `QUOTE_BEGIN « ${commentators[index].comment} » (${commentators[index].name}) QUOTE_END \n `;
 			renderCommentators();
 		})
