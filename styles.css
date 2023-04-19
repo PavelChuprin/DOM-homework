@@ -156,3 +156,67 @@ body {
 	box-shadow: 0 0 5px 5px #bcec30;
 	border-radius: 8px;
 }
+
+.loader {
+	animation: rotate 1s infinite;
+	height: 50px;
+	width: 50px;
+	margin-top: 50px;
+	margin-bottom: 50px;
+}
+.loader:before,
+.loader:after {
+	border-radius: 50%;
+	content: "";
+	display: block;
+	height: 20px;
+	width: 20px;
+}
+.loader:before {
+	animation: ball1 1s infinite;
+	background-color: #bcec30;
+	box-shadow: 30px 0 0 #7334ea;
+	margin-bottom: 10px;
+}
+.loader:after {
+	animation: ball2 1s infinite;
+	background-color: #7334ea;
+	box-shadow: 30px 0 0 #bcec30;
+}
+@keyframes rotate {
+	0% { transform: rotate(0deg) scale(0.8) }
+	50% { transform: rotate(360deg) scale(1.2) }
+	100% { transform: rotate(720deg) scale(0.8) }
+}
+@keyframes ball1 {
+	0% {
+		box-shadow: 30px 0 0 #7334ea;
+	}
+	50% {
+		box-shadow: 0 0 0 #7334ea;
+		margin-bottom: 0;
+		transform: translate(15px, 15px);
+	}
+	100% {
+		box-shadow: 30px 0 0 #7334ea;
+		margin-bottom: 10px;
+	}
+}
+@keyframes ball2 {
+	0% {
+		box-shadow: 30px 0 0 #bcec30;
+	}
+	50% {
+		box-shadow: 0 0 0 #bcec30;
+		margin-top: -20px;
+		transform: translate(15px, 15px);
+	}
+	100% {
+		box-shadow: 30px 0 0 #bcec30;
+		margin-top: 0;
+	}
+}
+	
+.display-none {
+	display: none;
+}

@@ -7,25 +7,26 @@
 
   <body>
     <div class="container">
-      <ul class="comments">
+      <ul class="comments" id="comments-all">
 			<!-- Список рендерится из JS -->
       </ul>
+		<div class="loader"></div>
       <div class="add-form">
-        <input
-          type="text"
-          class="add-form-name"
-          placeholder="Введите ваше имя"
-        />
-        <textarea
-          type="textarea"
-          class="add-form-text"
-          placeholder="Введите ваш комментарий"
-          rows="4"
-        ></textarea>
-        <div class="add-form-row">
-			<button class="remove-form-button">Удалить последний комментарий</button>
-          <button class="add-form-button">Написать</button>
-        </div>
+			<input
+			type="text"
+			class="add-form-name"
+			placeholder="Введите ваше имя"
+			/>
+			<textarea
+			type="textarea"
+			class="add-form-text"
+			placeholder="Введите ваш комментарий"
+			rows="4"
+			></textarea>
+			<div class="add-form-row">
+				<button class="remove-form-button">Удалить последний комментарий</button>
+				<button disabled="true" class="add-form-button">Написать</button>
+			</div>
       </div>
     </div>
   </body>
