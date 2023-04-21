@@ -10,19 +10,20 @@ const date = new Date();
 // Создаем массив для хранения комментариев
 let commentators = [];
 
+// Ф-ция для API запроса с м-дом GET
 function getFunc() {
-	const fetchPromise = fetch('https://webdev-hw-api.vercel.app/api/v1/pavel-chuprin/comments', {
+	fetch('https://webdev-hw-api.vercel.app/api/v1/pavel-chuprin/comments', {
 		method: "GET",
-})
-fetchPromise.then((response) => {
-	const jsonPromise = response.json();
-	jsonPromise.then((responseData) => {
+	})
+	.then((response) => {
+		return response.json();
+	})
+	.then((responseData) => {
 		commentators = responseData.comments;
-		renderCommentators();
 		loaderAnimation.classList.add("display-none");
 		formElement.classList.remove("display-none");
+		renderCommentators();
 	})
-})
 }
 getFunc();
 
@@ -65,6 +66,17 @@ function funcLikes() {
 			event.stopPropagation(); // при клике на кнопку лайков мы прерываем дальнейшее всплытие событий
 			// это же не забываем сделать для кнопки "Редактировать / Сохранить" ниже, т.к. они тоже находятся в элементе li
 			// и по правильному сценарию не должны запускать последующие всплытия событий
+			btnLike.classList.add("-loading-like");
+
+// Функция для имитации запросов в API с задержкой Timeout()
+	function delay(interval) {
+		return new Promise((resolve) => {
+			setTimeout(() => {
+			resolve();
+			}, interval);
+		});
+	};
+		delay(2000).then(() => {
 			if (commentators[index].isLiked) {
 				commentators[index].isLiked = false;
 				commentators[index].likes -= 1;
@@ -73,6 +85,7 @@ function funcLikes() {
 				commentators[index].likes += 1;
 			}
 			renderCommentators();
+		});
 		})
 	}
 }
@@ -147,25 +160,23 @@ addButtonElement.addEventListener("click", () => {
 function funcButton() {
 	loaderAnimation.classList.remove("display-none");
 	formElement.classList.add("display-none");
-	fetch('https://webdev-hw-api.vercel.app/api/v1/pavel-chuprin/comments', {
-		method: "POST",
-		body: JSON.stringify({
-			name: nameElement.value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'), 
-			// безопасность (производим замену символов) - пользователь не может вводить теги в поле ввода, тем самым ломая вёрстку, или что ещё хуже...
-			date: `${date.getDate() < 10 ? "0" : ""}${date.getDate()}.${date.getMonth() < 10 ? "0" : ""}${date.getMonth() + 1}.${date.getFullYear() - 2000} 
-			${date.getHours() < 10 ? "0" : ""}${date.getHours()}:${date.getMinutes() < 10 ? "0" : ""}${date.getMinutes()}`,
-			text: commentElement.value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'),
-			likes: 0,
-			isLiked: false,
-			isEdit: false,
+		fetch('https://webdev-hw-api.vercel.app/api/v1/pavel-chuprin/comments', {
+			method: "POST",
+			body: JSON.stringify({
+				name: nameElement.value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'), 
+				// безопасность (производим замену символов) - пользователь не может вводить теги в поле ввода, тем самым ломая вёрстку, или что ещё хуже...
+				date: `${date.getDate() < 10 ? "0" : ""}${date.getDate()}.${date.getMonth() < 10 ? "0" : ""}${date.getMonth() + 1}.${date.getFullYear() - 2000} 
+				${date.getHours() < 10 ? "0" : ""}${date.getHours()}:${date.getMinutes() < 10 ? "0" : ""}${date.getMinutes()}`,
+				text: commentElement.value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'),
+				likes: 0,
+				isLiked: false,
+				isEdit: false,
+			})
 		})
-	}).then((response) => {
-		response.json().then((responseData) => {
+		.then(() => {
 			getFunc();
-			renderCommentators();
 		});
-	});
-	renderCommentators();
+
 	nameElement.value = ""; // очищаем поле формы после ввода
 	commentElement.value = "";
 }
