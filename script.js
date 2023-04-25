@@ -160,6 +160,8 @@ addButtonElement.addEventListener("click", () => {
 function funcButton() {
 	loaderAnimation.classList.remove("display-none");
 	formElement.classList.add("display-none");
+	
+	function postFunc() {
 		fetch('https://webdev-hw-api.vercel.app/api/v1/pavel-chuprin/comments', {
 			method: "POST",
 			body: JSON.stringify({
@@ -171,14 +173,38 @@ function funcButton() {
 				likes: 0,
 				isLiked: false,
 				isEdit: false,
+				forceError: true, // рандомная инициация ошибки 500
 			})
 		})
+		.then((response) => {
+			if (response.status === 201) {
+				nameElement.value = ""; // очищаем поле формы после ввода (и успешной отправки на сервер)
+				commentElement.value = "";
+			}
+			else if (response.status === 400) {
+				alert('Имя и комментарий должны быть не короче 3 символов');
+			} else {
+				throw new Error("Сервер упал"); // или return Promise.reject(new Error("Сервер упал"));
+				
+				// alert('Сервер сломался, попробуй позже');
+				// комментируем, чтобы alert не всплывал и не мешал нам,
+				// а отработала автоматическая отправка коммента на сервер при ошибке 500
+			}
+		})
 		.then(() => {
-			getFunc();
-		});
-
-	nameElement.value = ""; // очищаем поле формы после ввода
-	commentElement.value = "";
+			return getFunc();
+		})
+		.catch((error) => {
+			if (error.message === "Сервер упал") {
+				postFunc();
+			} else {
+				alert('Кажется, у вас сломался интернет, попробуйте позже');
+				loaderAnimation.classList.add("display-none");
+				formElement.classList.remove("display-none");
+			}
+		})
+	}
+	postFunc();
 }
 
 // Расширенная валидация.Кнопка некликабельна, если имя или текст в форме незаполненные
