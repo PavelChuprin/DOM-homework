@@ -1,3 +1,7 @@
+import { renderCommentators } from "./renderCommentators.js";
+import { getListComments } from "./listComments.js";
+import { fetchGetApi, fetchPostApi } from "./api.js";
+
 const nameElement = document.querySelector(".add-form-name");
 const commentElement = document.querySelector(".add-form-text");
 const addButtonElement = document.querySelector(".add-form-button");
@@ -12,50 +16,22 @@ let commentators = [];
 
 // Ф-ция для API запроса с м-дом GET
 function getFunc() {
-	fetch('https://webdev-hw-api.vercel.app/api/v1/pavel-chuprin/comments', {
-		method: "GET",
-	})
-	.then((response) => {
-		return response.json();
-	})
+	fetchGetApi()
 	.then((responseData) => {
 		commentators = responseData.comments;
 		loaderAnimation.classList.add("display-none");
 		formElement.classList.remove("display-none");
-		renderCommentators();
+		renderCommentators(commentators, listElement, getListComments);
+		funcLikes();
+		editMessage();
+		saveMessage();
+		replyMessage();
+		areaEditMessage();
 	})
 }
 getFunc();
 
-// Создаем рендер-функцию
-const renderCommentators = () => {
-	const commentatorsHtml = commentators.map((commentator, index) => {
-			return `<li class="comment" data-index="${index}">
-			<div class="comment-header">
-				<div>${commentator.author.name}</div>
-				<div>${commentator.date}</div>
-			</div>
-			<div class="comment-body">
-				${commentator.isEdit ? `<textarea id="input" class="comment-text textarea" type="texrarea">${commentator.text}</textarea>` : `<div class="comment-text">${commentator.text.replaceAll("»", "<div class='quote'>").replaceAll("©", "</div>")}</div>`}
-			</div>
-			<div class="comment-footer">
-				${commentator.isEdit ? `<button data-index="${index}" class="save-form-button">Сохранить</button>` : `<button data-index="${index}" class="edit-form-button">Редактировать</button>`}
-				<div class="likes">
-					<span class="likes-counter">${commentator.likes}</span>
-					<button class="like-button ${commentator.isLiked ? '-active-like' : ''}" data-index="${index}"></button>
-				</div>
-			</div>
-			</li>`
-	})
-	.join('');
-	listElement.innerHTML = commentatorsHtml;
-	funcLikes();
-	editMessage();
-	saveMessage();
-	replyMessage();
-	areaEditMessage();
-}
-renderCommentators();
+renderCommentators(commentators, listElement, getListComments);
 
 // Кнопка лайков
 function funcLikes() {
@@ -63,7 +39,8 @@ function funcLikes() {
 	for (const btnLike of buttonLikes) {
 		const index = btnLike.dataset.index;
 		btnLike.addEventListener("click", (event) => {
-			event.stopPropagation(); // при клике на кнопку лайков мы прерываем дальнейшее всплытие событий
+			event.stopPropagation(); 
+			// при клике на кнопку лайков мы прерываем дальнейшее всплытие событий
 			// это же не забываем сделать для кнопки "Редактировать / Сохранить" ниже, т.к. они тоже находятся в элементе li
 			// и по правильному сценарию не должны запускать последующие всплытия событий
 			btnLike.classList.add("-loading-like");
@@ -84,7 +61,8 @@ function funcLikes() {
 				commentators[index].isLiked = true;
 				commentators[index].likes += 1;
 			}
-			renderCommentators();
+			renderCommentators(commentators, listElement, getListComments);
+			funcLikes();
 		});
 		})
 	}
@@ -98,7 +76,7 @@ function replyMessage () {
 		each.addEventListener('click', () => {
 			commentElement.scrollIntoView({behavior: "smooth"}); // плавная прокрутка к полю ввода
 			commentElement.value = `» ${commentators[index].text} (${commentators[index].author.name}) © \n `;
-			renderCommentators();
+			// renderCommentators(commentators, listElement, getListComments);
 		})
 	}
 }
@@ -111,7 +89,7 @@ function editMessage() {
 		edBtn.addEventListener("click", (event) =>{
 			event.stopPropagation(); // прерывание всплытия событий
 			commentators[index].isEdit = !commentators[index].isEdit;
-			renderCommentators();
+			renderCommentators(commentators, listElement, getListComments);
 		})
 	}
 }
@@ -136,7 +114,7 @@ function saveMessage() {
 			event.stopPropagation();  // прерывание всплытия событий
 			commentators[index].isEdit = false;
 			commentators[index].text = inputMessage.value;
-			renderCommentators();
+			renderCommentators(commentators, listElement, getListComments);
 		})
 	}
 }
@@ -161,21 +139,33 @@ function funcButton() {
 	loaderAnimation.classList.remove("display-none");
 	formElement.classList.add("display-none");
 	
+	commentators.push({
+		name: nameElement.value
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;'), 
+		// безопасность (производим замену символов) - 
+		// пользователь не может вводить теги в поле ввода, 
+		//тем самым ломая вёрстку, или что ещё хуже...
+		date: `${date.getDate() < 10 ? "0" : ""}${date.getDate()}.
+		${date.getMonth() < 10 ? "0" : ""}${date.getMonth() + 1}.
+		${date.getFullYear() - 2000} 
+		${date.getHours() < 10 ? "0" : ""}${date.getHours()}:
+		${date.getMinutes() < 10 ? "0" : ""}${date.getMinutes()}`,
+		text: commentElement.value
+		.replaceAll('&', '&amp;')
+		.replaceAll('<', '&lt;')
+		.replaceAll('>', '&gt;')
+		.replaceAll('"', '&quot;'),
+		likes: 0,
+		isLiked: false,
+		isEdit: false,
+		forceError: true, // рандомная инициация ошибки 500
+	})
+
 	function postFunc() {
-		fetch('https://webdev-hw-api.vercel.app/api/v1/pavel-chuprin/comments', {
-			method: "POST",
-			body: JSON.stringify({
-				name: nameElement.value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'), 
-				// безопасность (производим замену символов) - пользователь не может вводить теги в поле ввода, тем самым ломая вёрстку, или что ещё хуже...
-				date: `${date.getDate() < 10 ? "0" : ""}${date.getDate()}.${date.getMonth() < 10 ? "0" : ""}${date.getMonth() + 1}.${date.getFullYear() - 2000} 
-				${date.getHours() < 10 ? "0" : ""}${date.getHours()}:${date.getMinutes() < 10 ? "0" : ""}${date.getMinutes()}`,
-				text: commentElement.value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'),
-				likes: 0,
-				isLiked: false,
-				isEdit: false,
-				forceError: true, // рандомная инициация ошибки 500
-			})
-		})
+		fetchPostApi(nameElement.value, commentElement.value)
 		.then((response) => {
 			if (response.status === 201) {
 				nameElement.value = ""; // очищаем поле формы после ввода (и успешной отправки на сервер)
@@ -228,12 +218,12 @@ deleteButtonElement.addEventListener("click", () => {
 	const lastComment = listElement.innerHTML.lastIndexOf('<li class="comment">');
 	listElement.innerHTML = listElement.innerHTML.slice(0, lastComment);
 	commentators.pop();
-	renderCommentators();
+	// renderCommentators(commentators, listElement, getListComments);
 });
 // Удаление последнего элемента 2 способ
 // deleteButtonElement.addEventListener("click", () => {
 // 	const commentsAll = document.getElementById('comments-all');
 // 	commentsAll.lastChild.remove();
 // 	commentators.pop();
-// 	renderCommentators();
+// 	renderCommentators(commentators, listElement, getListComments);
 // });
