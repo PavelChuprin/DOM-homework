@@ -6,7 +6,7 @@ import { renderFormInputComponent } from "./components/formAddComment-component.
 const date = new Date();
 
 // Создаем массив для хранения комментариев
-export let commentators = [];
+let commentators = [];
 
 let token = "Bearer asb4c4boc86gasb4c4boc86g37w3cc3bo3b83k4g37k3bk3cg3c03ck4k";
 
@@ -114,11 +114,7 @@ export const funcButtonAddComment = () => {
     // безопасность (производим замену символов) -
     // пользователь не может вводить теги в поле ввода,
     //тем самым ломая вёрстку, или что ещё хуже...
-    date: `${date.getDate() < 10 ? "0" : ""}${date.getDate()}.
-		${date.getMonth() < 10 ? "0" : ""}${date.getMonth() + 1}.
-		${date.getFullYear() - 2000} 
-		${date.getHours() < 10 ? "0" : ""}${date.getHours()}:
-		${date.getMinutes() < 10 ? "0" : ""}${date.getMinutes()}`,
+    date: date,
     text: commentElement.value
       .replaceAll("&", "&amp;")
       .replaceAll("<", "&lt;")

@@ -1,9 +1,12 @@
+import { format } from "date-fns";
+
 export const getListComments = (user, index) => {
+	const createDate = format(new Date(user.date), "yyyy-MM-dd hh.mm.ss");
 	return `
 	<li class="comment" data-index="${index}">
 <div class="comment-header">
 	<div >${user.author.name}</div>
-	<div>${user.date}</div>
+	<div>${createDate}</div>
 </div>
 <div class="comment-body">
 	<div class="comment-text">${user.text.replaceAll("»", "<div class='quote'>").replaceAll("©", "</div>")}</div>
